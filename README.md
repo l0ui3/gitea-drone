@@ -17,7 +17,9 @@ $ docker-compose up -d
 ```
 
 **Exposed Services**
+
 - Gitea: http://your-domain.com/git
 - Gitea-SSH: your-domain.com:2222
 - Drone: http://your-domain.com:81
 - Traefik Web UI: http://localhost:8081
+

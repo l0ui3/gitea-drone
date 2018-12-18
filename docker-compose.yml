@@ -30,7 +30,7 @@ services:
         environment:
             - DRONE_GITEA_SERVER=http://gitea:3000
             - DRONE_GIT_ALWAYS_AUTH=false
-            - DRONE_SERVER_HOST=http://drone
+            - DRONE_SERVER_HOST=your-domain.com:81
             - DRONE_RUNNER_CAPACITY=2
             - DRONE_SERVER_PROTO=http
             - DRONE_TLS_AUTOCERT=false
