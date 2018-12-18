@@ -1,0 +1,64 @@
+version: "3"
+services:
+
+    gitea:
+        image: gitea/gitea:latest
+        restart: always
+        ports:
+            - "2222:22"
+        volumes:
+            - ./gitea:/data
+            - ./gitea-app.ini:/data/gitea/conf/app.ini
+        labels:
+            - traefik.backend=gitea
+            - traefik.frontend.rule=Host:your-domain.com
+            # You can specify path prefix for gitea, set
+            # to / if you don't want to use path prefix.
+            - traefik.frontend.rule=PathPrefixStrip:/git
+            - traefik.frontend.entryPoints=http
+            - traefik.docker.network=gitea-network
+            - traefik.port=3000
+
+    drone:
+        image: drone/drone:1.0.0-rc.3
+        restart: always
+        depends_on:
+            - gitea
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./drone:/var/lib/drone
+        environment:
+            - DRONE_GITEA_SERVER=http://gitea:3000
+            - DRONE_GIT_ALWAYS_AUTH=false
+            - DRONE_SERVER_HOST=http://drone
+            - DRONE_RUNNER_CAPACITY=2
+            - DRONE_SERVER_PROTO=http
+            - DRONE_TLS_AUTOCERT=false
+            - DRONE_NETWORK=gitea-network
+        labels:
+            - traefik.backend=drone
+            - traefik.frontend.rule=Host:your-domain.com
+            - traefik.frontend.rule=PathPrefixStrip:/
+            - traefik.frontend.entryPoints=drone
+            - traefik.docker.network=gitea-network
+            - traefik.port=80
+
+    reverse-proxy:
+        image: traefik
+        command: --api --docker
+        links:
+            - gitea
+            - drone
+        ports:
+            - "80:80" # for Gitea
+            - "81:81" # for Drone
+            - "8081:8080" # for Traefik Web UI
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./traefik:/etc/traefik
+
+
+networks:
+  default:
+    external:
+      name: gitea-network

@@ -1,0 +1,7 @@
+defaultEntryPoints = ["http", "drone"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+  [entryPoints.drone]
+  address = ":81"
